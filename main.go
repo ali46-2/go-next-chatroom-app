@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
+	"github.com/joho/godotenv"
 )
 
 type connections map[*websocket.Conn]struct{}
 
 var (
-	upgrader    = websocket.Upgrader{}
+	upgrader    websocket.Upgrader
 	subscribers = make(map[string]connections)
 	topics      = []string{"anime", "books", "games", "movies", "music"}
 	mutex       sync.Mutex
@@ -68,7 +70,30 @@ func handleConnection(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getEnv(key string) string {
+	env := os.Getenv(key)
+	if env == "" {
+		log.Fatal("missing env variable: ", key)
+	}
+
+	return env
+}
+
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("error loading .env file")
+	}
+
+	port := getEnv("PORT")
+	frontendURL := getEnv("FRONTEND_URL")
+
+	upgrader = websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return r.Header.Get("Origin") == frontendURL
+		},
+	}
+
 	for _, topic := range topics {
 		http.HandleFunc("/ws/"+topic, handleConnection)
 	}
@@ -77,5 +102,5 @@ func main() {
 		fmt.Fprintf(w, "Hello World!")
 	})
 
-	log.Fatal(http.ListenAndServe("localhost:3000", nil))
+	log.Fatal(http.ListenAndServe("localhost:"+port, nil))
 }
