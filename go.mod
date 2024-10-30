@@ -1,4 +1,4 @@
-module github.com/ali46-2/go-websocket-chat-app
+module github.com/ali46-2/go-next-chatroom-app
 
 go 1.23.2
 
