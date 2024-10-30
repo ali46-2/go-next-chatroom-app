@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
+import ChatMessage from "./ChatMessage";
 
 const topics = ["anime", "books", "games", "movies", "music"];
 
@@ -66,21 +67,19 @@ const Page = ({ params }: { params: Promise<{ topic: string }> }) => {
   return (
     <div className="flex h-screen justify-center p-8">
       <div className="flex flex-col justify-end h-full min-w-[400px] w-[600px] rounded-2xl overflow-hidden bg-gray-900">
-        <div className="flex justify-center items-center p-2 mb-auto text-2xl bg-gray-800">
+        <div className="flex justify-center items-center p-2 mb-auto text-2xl bg-gray-800 z-10 shadow-xl">
           {topic.charAt(0).toUpperCase() + topic.slice(1)} Chatroom
         </div>
-        <div className="overflow-y-auto">
-          <ul>
-            {messageHistory.map((m, i) => (
-              <li key={i}>{m}</li>
-            ))}
-          </ul>
+        <div className="p-2 overflow-y-auto">
+          {messageHistory.map((m, i) => (
+            <ChatMessage key={i + 1} message={m} end />
+          ))}
           <div ref={chatRef} />
         </div>
         <form
           ref={formRef}
           onSubmit={handleSubmit}
-          className="h-[10%] flex justify-center items-center p-8 bg-gray-800"
+          className="h-[10%] flex justify-center items-center p-8 bg-gray-800 border-t border-gray-700"
         >
           <textarea
             value={message}
